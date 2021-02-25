@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GolfBall : MonoBehaviour
+public class GameplayPanel : MonoBehaviour
 {
 
 }
