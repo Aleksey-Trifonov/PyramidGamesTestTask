@@ -20,8 +20,10 @@ public class GameplayManager : MonoBehaviour
 
     private static GameplayManager instance = null;
 
+    public event Action EventGameReset = null;
     public event Action<int> EventRoundWin = null;
-    public event Action EventRoundlose = null;
+    public event Action<int, int> EventRoundLose = null;
+    public event Action EvantBallLaunch = null;
 
     [SerializeField] 
     private GameSettings gameSettings = null;
@@ -41,20 +43,21 @@ public class GameplayManager : MonoBehaviour
     private Coroutine golfBallLifetimeCoroutine = null;
     private Vector2 currentBallVelocity = Vector2.zero;
     private int currentWinCount = 0;
+    private bool isGolfBallInMotion = false;
 
     private void Start()
     {
         if (golfBallInstance == null)
         {
             golfBallInstance = Instantiate(golfBallPrefab, golfBallStartingPoint);
-            golfBallInstance.EventBallCollision += OnBallCollision;
+            golfBallInstance.EventHoleCollision += FinishRound;
         }
 
         if (golfHoleInstance == null)
         {
             golfHoleInstance = Instantiate(golfHolePrefab, golfHoleStartingPoint);
         }
-
+        
         ResetGame();
     }
 
@@ -62,8 +65,13 @@ public class GameplayManager : MonoBehaviour
     {
         if (golfBallInstance != null)
         {
-            golfBallInstance.EventBallCollision -= OnBallCollision;
+            golfBallInstance.EventHoleCollision -= FinishRound;
         }
+    }
+
+    private void Update()
+    {
+        //check if out of bounds
     }
 
     public void ResetGame()
@@ -73,6 +81,7 @@ public class GameplayManager : MonoBehaviour
             golfHoleStartingPoint.position.x + Random.Range(-gameSettings.GolfHoleXOffset, gameSettings.GolfHoleXOffset), 
             golfHoleStartingPoint.position.y);
         currentBallVelocity = Vector2.zero;
+        EventGameReset?.Invoke();
     }
 
     public void ChargeBallVelocity()
@@ -87,11 +96,14 @@ public class GameplayManager : MonoBehaviour
     {
         golfBallInstance.LaunchBall(currentBallVelocity);
         golfBallLifetimeCoroutine = StartCoroutine(BallLifetime());
+        isGolfBallInMotion = true;
+        EvantBallLaunch?.Invoke();
     }
 
     public void FinishRound(bool isWin)
     {
         golfBallInstance.PauseBall();
+        isGolfBallInMotion = false;
 
         if (golfBallLifetimeCoroutine != null)
         {
@@ -108,16 +120,8 @@ public class GameplayManager : MonoBehaviour
         }
         else
         {
-            EventRoundlose?.Invoke();
+            EventRoundLose?.Invoke(currentWinCount, PlayerPrefs.GetInt(BestScoreKey));
             currentWinCount = 0;
-        }
-    }
-
-    private void OnBallCollision(int collisionCount)
-    {
-        if (collisionCount >= gameSettings.MaxNumberOfBounces)
-        {
-            FinishRound(false);
         }
     }
 

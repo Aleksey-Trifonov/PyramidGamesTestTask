@@ -5,22 +5,22 @@ using UnityEngine;
 
 public class GolfBallController : MonoBehaviour
 {
-    public event Action<int> EventBallCollision = null;
+    public event Action<bool> EventHoleCollision = null;
 
     private Rigidbody2D rb = null;
-    private int collisionCount = 0;
+    private int golfHoleLayer = 0;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.isKinematic = true;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        golfHoleLayer = LayerMask.NameToLayer("GolfHole");
     }
 
     public void LaunchBall(Vector2 velocity)
     {
-        rb.isKinematic = false;
+        rb.bodyType = RigidbodyType2D.Dynamic;
         rb.AddForce(velocity);
-        collisionCount = 0;
     }
 
     public void CalculateTrajectory(Vector2 velocity)
@@ -30,13 +30,16 @@ public class GolfBallController : MonoBehaviour
 
     public void PauseBall()
     {
-        rb.isKinematic = true;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        collisionCount++;
-        EventBallCollision?.Invoke(collisionCount);
-        Debug.LogWarning("Collision");
+        if (collision.gameObject.layer == golfHoleLayer)
+        {
+            EventHoleCollision?.Invoke(true);
+        }
     }
 }
