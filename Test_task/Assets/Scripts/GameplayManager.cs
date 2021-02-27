@@ -43,7 +43,6 @@ public class GameplayManager : MonoBehaviour
     private Coroutine golfBallLifetimeCoroutine = null;
     private Vector2 currentBallVelocity = Vector2.zero;
     private int currentWinCount = 0;
-    private bool isGolfBallInMotion = false;
 
     private void Start()
     {
@@ -51,6 +50,7 @@ public class GameplayManager : MonoBehaviour
         {
             golfBallInstance = Instantiate(golfBallPrefab, golfBallStartingPoint);
             golfBallInstance.EventHoleCollision += FinishRound;
+            golfBallInstance.EventCollision += CheckIfOvershoot;
         }
 
         if (golfHoleInstance == null)
@@ -66,12 +66,8 @@ public class GameplayManager : MonoBehaviour
         if (golfBallInstance != null)
         {
             golfBallInstance.EventHoleCollision -= FinishRound;
+            golfBallInstance.EventCollision -= CheckIfOvershoot;
         }
-    }
-
-    private void Update()
-    {
-        //check if out of bounds
     }
 
     public void ResetGame()
@@ -89,21 +85,23 @@ public class GameplayManager : MonoBehaviour
         var winModifier = currentWinCount * gameSettings.ConsecutiveWinVelocityModifier;
         currentBallVelocity += new Vector2(gameSettings.GolfBallXVelocityIncrementRate + winModifier, 
             gameSettings.GolfBallYVelocityIncrementRate + winModifier) * Time.deltaTime;
-        golfBallInstance.CalculateTrajectory(currentBallVelocity);
+        var lastDotCameraPos = Camera.main.WorldToViewportPoint(golfBallInstance.CalculateTrajectory(currentBallVelocity));
+        if (lastDotCameraPos.x > 1)
+        {
+            LaunchBall();
+        }
     }
 
     public void LaunchBall()
     {
         golfBallInstance.LaunchBall(currentBallVelocity);
         golfBallLifetimeCoroutine = StartCoroutine(BallLifetime());
-        isGolfBallInMotion = true;
         EvantBallLaunch?.Invoke();
     }
 
     public void FinishRound(bool isWin)
     {
         golfBallInstance.PauseBall();
-        isGolfBallInMotion = false;
 
         if (golfBallLifetimeCoroutine != null)
         {
@@ -114,7 +112,12 @@ public class GameplayManager : MonoBehaviour
         if (isWin)
         {
             currentWinCount++;
-            PlayerPrefs.SetInt(BestScoreKey, currentWinCount);
+
+            if (PlayerPrefs.GetInt(BestScoreKey) < currentWinCount)
+            {
+                PlayerPrefs.SetInt(BestScoreKey, currentWinCount);
+            }
+            
             EventRoundWin?.Invoke(currentWinCount);
             ResetGame();
         }
@@ -122,6 +125,14 @@ public class GameplayManager : MonoBehaviour
         {
             EventRoundLose?.Invoke(currentWinCount, PlayerPrefs.GetInt(BestScoreKey));
             currentWinCount = 0;
+        }
+    }
+
+    private void CheckIfOvershoot()
+    {
+        if (golfBallInstance.transform.position.x > (golfHoleInstance.transform.position.x + 0.7f))
+        {
+            FinishRound(false);
         }
     }
 

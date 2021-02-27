@@ -96,6 +96,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 800c266f5dbdb9747b84b1e2feed7c2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trajectoryDotPrefab: {fileID: 1285397976262294236, guid: 8b7414b29314cf04a99d4aa8c4e7ae8c,
+    type: 3}
+  trajectoryTimeStep: 0.3
 --- !u!58 &5210310510937620516
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -120,16 +123,16 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7977431698606198520}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_GravityScale: 1
   m_Material: {fileID: 6200000, guid: e7c06251ebff9354d950767ea76412f4, type: 2}
-  m_Interpolate: 0
+  m_Interpolate: 2
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0

@@ -28,4 +28,11 @@ public class AimButton : Button
             GameplayManager.Instance.ChargeBallVelocity();
         }
     }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+
+        isPressed = false;
+    }
 }

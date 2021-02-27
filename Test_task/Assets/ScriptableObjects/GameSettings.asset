@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: GameSettings
   m_EditorClassIdentifier: 
   GolfHoleXOffset: 1.5
-  GolfBallXVelocityIncrementRate: 100
-  GolfBallYVelocityIncrementRate: 80
-  ConsecutiveWinVelocityModifier: 5
-  MaxNumberOfBounces: 4
+  GolfBallXVelocityIncrementRate: 2
+  GolfBallYVelocityIncrementRate: 4
+  ConsecutiveWinVelocityModifier: 0.2
   GolfBallLifetime: 3
